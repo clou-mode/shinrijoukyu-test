@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>神理上級テスト</title>
+<style>
+:root { --rainbow: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); }
+body, html {
+margin: 0; padding: 0; height: 100%; width: 100%;
+font-family: "Hiragino Mincho ProN", serif; background: #fff;
+overflow: hidden; touch-action: manipulation;
+}
+.page {
+display: none; width: 100%; height: 100dvh;
+flex-direction: column; align-items: center;
+justify-content: flex-start; position: relative; box-sizing: border-box;
+padding: 20px;
+}
+.active { display: flex; }
+
+/* --- ホーム画面 --- */
+#p1 { justify-content: center; text-align: center; }
+.p1-main { font-size: 45px; font-weight: bold; margin: 10px 0; letter-spacing: 5px; color: #000; }
+.btn-rainbow {
+background: var(--rainbow); color: #fff; border: 2px solid #fff; padding: 18px 80px;
+font-size: 28px; font-weight: 900; border-radius: 60px; cursor: pointer;
+box-shadow: 0 8px 20px rgba(0,0,0,0.3); margin-top: 40px;
+}
+
+/* --- メニュー・入力画面 --- */
+.form-container { width: 100%; max-width: 450px; }
+label { font-weight: bold; font-size: 18px; display: block; margin-bottom: 8px; text-align: left; }
+input { width: 100%; padding: 15px; font-size: 20px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+
+/* 【重要】注意事項を左端に揃える設定 */
+.notice-box {
+text-align: left; /* ← ここで左端に揃えています */
+font-size: 15px; color: #333; background: #f9f9f9;
+padding: 20px; border-radius: 10px; margin-bottom: 25px;
+line-height: 1.8; border: 1px solid #eee; width: 100%; box-sizing: border-box;
+}
+.notice-title { font-weight: bold; font-size: 17px; display: block; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+
+.menu-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.menu-btn { padding: 18px; background: #f0f2f5; border: 1px solid #dcdfe6; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; text-align: center; }
+
+/* --- クイズ画面 --- */
+#p-quiz { padding: 0; align-items: stretch; }
+#timer-bg { width: 100%; height: 12px; background: #eee; }
+#timer-bar { height: 100%; background: blue; width: 100%; transition: width 0.1s linear; }
+/* 【重要】問題文は中央に配置 */
+.q-area { font-size: 24px; font-weight: bold; padding: 40px 20px; flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.6; color: #000; }
+.ox-box { display: flex; width: 100%; height: 45vh; border-top: 2px solid #eee; }
+.ox-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 100px; cursor: pointer; -webkit-user-select: none; }
+.o-btn { color: red; border-right: 1px solid #eee; background: #fffafa; }
+.x-btn { color: blue; background: #fafaff; }
+
+/* フィードバック背景 */
+.fb-o { background-color: rgba(0, 0, 255, 0.1) !important; }
+.fb-x { background-color: rgba(255, 0, 0, 0.1) !important; }
+
+/* --- 結果画面 --- */
+#p-res { align-items: center; text-align: center; justify-content: center; }
+.judge-wrap { font-size: 65px; font-weight: bold; margin: 30px 0; }
+.res-link { font-size: 20px; font-weight: bold; color: blue; cursor: pointer; margin: 15px 0; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div id="p1" class="page active">
+<div class="p1-main">神理</div>
+<div class="p1-main">”上級テスト”</div>
+<button class="btn-rainbow" onclick="goTo('p2')">入口</button>
+</div>
+
+<div id="p2" class="page">
+<div class="form-container">
+<label>ニックネーム（必須）</label>
+<input type="text" id="uname" placeholder="例：光の探究者">
+
+<div class="notice-box">
+<span class="notice-title">【 注意事項 】</span>
+① 各問題の制限時間は６０秒です。<br>
+② 問題は、答え直すことはできません。<br>
+③ ８０％の正解で、合格となります。<br>
+④ 間違えた問題のみをやり直すことは出来ますが、正解ならば青い画面、間違いならば赤い画面になるだけです。<br>
+⑤ ランダムで問題が出題されますので、何度でも挑戦してみてください。
+</div>
+
+<div class="menu-grid">
+<button class="menu-btn" onclick="startQ(10)">🔷 10問挑戦</button>
+<button class="menu-btn" onclick="startQ(30)">🔶 30問挑戦</button>
+<button class="menu-btn" onclick="startQ(50)">💎 50問挑戦</button>
+<button class="menu-btn" onclick="startQ(172)">🔥 全問挑戦 (172問)</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="p-quiz" class="page">
+<div id="timer-bg"><div id="timer-bar"></div></div>
+<div id="q-text" class="q-area"></div>
+<div class="ox-box">
+<div class="ox-btn o-btn" onclick="handleAns(true)">○</div>
+<div class="ox-btn x-btn" onclick="handleAns(false)">×</div>
+</div>
+</div>
+
+<div id="p-res" class="page">
+<div id="res-msg" style="font-size:22px; margin-top:40px; font-weight: bold;"></div>
+<div id="judge-box" class="judge-wrap"></div>
+<div style="padding-bottom:40px;">
+<div class="res-link" onclick="retryWrongs()">間違いを解き直す</div>
+<div class="res-link" style="color:gray; font-size:16px;" onclick="location.reload()">ホームに戻る</div>
+</div>
+</div>
+
+<script>
+// 「上級シャッフル」タブの全172問を忠実に反映
+const data = [
+{q:" 「女性の法」は、女性のための法であり、男性は学ばなくてもよい", a:false},
+{q:" １９７０年日本には九次元霊が二人肉体を持っていた", a:true},
+{q:"愛とはエネルギーである", a:true},
+{q:" 愛は人びとの間を循環しながら大きなうねりとなる", a:true},
+{q:" 愛は実践を通して表現すべきものである ", a:true},
+{q:" 相手を裁くことは、その人の成長を阻害することにつながる", a:true},
+{q:" 愛を実践することは愛の通路となることである", a:true},
+{q:" 愛の実践のためには反省は必要ではない ", a:false},
+{q:" アガシャーは十三次元意識で、アンドロメダ銀河も担当している", a:true},
+{q:" アセンション後、三次元地球文明は石器時代からやり直しとなる ", a:true},
+{q:" アセンション後も素粒子そのものは変化しない", a:true },
+{q:" アセンション後は結婚という形態がなくなる ", a:false},
+{q:" アセンション後にどんな仕事をするかは上からの命令で決まる ", a:false},
+{q:" 甘えにつながるので自分自身を赦してはいけない", a:false},
+{q:" あまりやりすぎず、適当なところで妥協するのが中道の極意である", a:false},
+{q:" 新たなカルマをつくらないためにも反省は重要である", a:true},
+{q:" アラハンの修行を終えた人は霊道を開くことができる", a:false },
+{q:" アラハンを超えると誰でも霊道を開くことができる", a:false },
+{q:" 宇宙に偏在する愛のエネルギーとは「ダークエネルギー」のことである", a:true},
+{q:" 生まれ落ちる境遇は、生まれる前の自分には決定権はない", a:false},
+{q:" 多くの人びとから愛を与えられれば幸せな一生となる", a:false },
+{q:" 多くの人びとから愛を与えられれば幸せになれる", a:false },
+{q:" オーム宇宙の最後は超新星爆発に似た姿をとる", a:true},
+{q:" オーム宇宙の人格霊は、ヒューマノイド型の肉体に宿ることが多い", a:true},
+{q:" オーム宇宙の最期は超新星爆発に似た姿をとる", a:true},
+{q:" オーム神霊がルシをつくったため、人びとが悪に手を染めるようになった ", a:false },
+{q:" オームとは「破壊し、創造するもの」という意味である ", a:true},
+{q:" オーム宇宙が膨張を続ける速さは次第に減少している ", a:false},
+{q:" オーム宇宙は巨大な球体で膨張を続けている", a:false},
+{q:" オーム神霊がビッグバンで宇宙を作ったのは今回が初めてである ", a:false},
+{q:" 幼くして亡くなった子どもの魂は純粋なので、必ず天上界に還っている ", a:false},
+{q:" 親は子どもに「親に感謝しなさい」と教えなければならない", a:false},
+{q:" 親は我が子を自分の所有物とみなしてもよい ", a:false},
+{q:" 親への感謝の気持ちは親に対する愛の実践で返すことが望ましい", a:true},
+{q:" オリオン出身の両性具有体は、将来、母星で男性体と女性体に引き裂かれる予定である", a:true},
+{q:" 科学の発展が魔に利用されることもある ", a:true},
+{q:" 科学も芸術も、霊界からのインスピレーションで地上に降ろされる ", a:true},
+{q:" 過去世で蓄えられた智慧を「パーニャパラミッタ」と呼ぶ ", a:true},
+{q:" 過去の自らの愛の実践は忘れても構わない", a:true},
+{q:" 過去世で殺した相手から、今後は殺されなければカルマは返せない", a:false},
+　 {q:" 火星に住んでいた人類の魂が地球で転生することはない", a:false},
+{q:" 神に対する感謝の思いがあるならば、愛の実践でお返しすべきである", a:true},
+{q:" 神に近づけば近づくほど個性の色がなくなり、無色に近くなる", a:false},
+{q:" 神に近づけば近づくほど個性の色はなくなり透明になる", a:false},
+{q:" 神へと続く道をどんどん進むと個性の色は無色になってくる", a:false},
+{q:" カルマの刈り取りはこの世の人生の目的のすべてである ", a:false},
+{q:" カルマの刈り取りのためには反省はいらない ", a:false},
+{q:" カルマの刈り取りは自力で行うもので、守護霊は助けてはならない ", a:false},
+{q:" カルマの刈り取りができないような人生設計を立てて生まれてくることもある", a:false},
+{q:" カルマの刈り取りができないような人生設計を立てて生まれることもある ", a:false},
+{q:" 救済運動の中心にいる人は魔にねらわれることはない", a:false},
+{q:" 銀色光線の魂は、マテリアル世界がないと力を発揮することができない", a:true},
+{q:" 九次元霊でなければ救世主の仕事とをすることはできない", a:false},
+{q:" 九次元霊の地上での使命は取り上げられることはない ", a:false},
+{q:" 九次元霊は地上でカルマの刈り取りをする必要はない", a:false},
+{q:" 原因結果の法則は、今世だけで成り立つ法則である ", a:false},
+{q:" 弦楽器の弦の張り方の強さのたとえ話で、「中道」が理解しやすくなる ", a:true},
+{q:" 現在、地球にいる九次元霊は全部で１２人である", a:true},
+{q:" 己心の魔は、本人のカルマに関係することが多い ", a:true},
+{q:" この世で得た財産はあの世に持って帰れないが、名誉は持って帰れる", a:false},
+{q:" これだけは絶対手放せないというものが、誰にでも必ずある", a:false},
+{q:" 今回のビッグバン以前の宇宙から個性として存在していた人格例もいる", a:true},
+{q:" 今回のビッグバンの前のオーム宇宙でも、ルシという魂は存在していた", a:true},
+{q:" 今世で新たなカルマをつくらないためにも反省はすべきである", a:true},
+{q:" 今世の初期条件はカルマと関係が深い", a:true},
+{q:" ゴンドワナ文明で、根本法として「女性の法」が解かれたことがある", a:false},
+{q:" 最初から男性体のみとしてつくられた魂も存在する ", a:false},
+{q:" 自殺者の霊は地縛霊となることが多い ", a:true},
+{q:" 指導霊が途中で入れ替わることはない", a:false},
+{q:" 地縛霊は多かれ少なかれ地上への執着を持っている", a:true},
+{q:" 社会改革のためには陽のエネルギーが必要である", a:true},
+{q:" 十次元霊がペアで入っていない惑星もある", a:false},
+{q:" 女性の献身的な支えがあってこそ、男性は自分の才能を開花できる ", a:true },
+{q:" 人格霊で聖アントニウスと交信できるのは九次元上段階の５人のみ", a:false},
+　　　　{q:" 人格霊であっても、ヒューマノイド型の肉体に宿るのは少数である ", a:false},
+{q:" 人生で、時限爆弾が爆発するように病気になることはない", a:false},
+{q:" 神理は学ぶことが重要で、実践はそれほど重要ではない ", a:false},
+{q:" 神理を学べば愛の実践はしなくてもよい ", a:false},
+{q:" すべての惑星の衛星に陰のエネルギーが宿っている ", a:false},
+{q:" すべての人に、カルマの刈り取り以外の使命が与えられている", a:false},
+{q:" 生命エネルギーの注入がうまくできず、早期に病気で他界することもある", a:true },
+{q:" セレニティは人格霊だったことはない ", a:false},
+{q:" 戦闘系は愛を表現するのが苦手である ", a:false},
+{q:" 前文明で奴隷を虐待していた者は、今文明で奴隷に生まれることもある", a:true },
+{q:" 想念帯の曇りは守護霊からのインスピレーションを阻害する ", a:true },
+{q:" 想念帯の曇りを取り除くために、反省は有効である", a:true },
+{q:" 想念帯は表面意識と潜在意識の間に存在する", a:true },
+{q:" 第三の計画で、最も遅くメッセージを降ろした九次元霊はゾロアスターである", a:false},
+{q:" 胎児期に蓄積されるエネルギーが「生体エネルギー」である", a:true },
+{q:" 大天使ミカエルはドイツ人として生まれたあと、日本人として生まれた ", a:true },
+{q:" 他人のカルマを背負って生まれてくることはない", a:true },
+{q:" 他人のカルマを背負って生まれてくる場合もある", a:false},
+{q:" 他人を裁いてはいけないが、自分を裁くことは反省といえる ", a:false},
+{q:" 魂の兄弟グループの組み換えが起こることがある", a:true },
+{q:" 魂のパートナーと同時期に地上に生まれることはできない ", a:false},
+{q:" 魂の本来のパートナーは、原則九次元霊になるとわかる ", a:true },
+{q:" 魂の兄弟の組み換えが起こることはない ", a:false},
+{q:" 誰でも愛の通路となれるわけではない", a:false},
+{q:" 誰でも努力を続ければ、いつかは九次元霊になれる可能性がある", a:true },
+{q:" 誰でも地上で結婚しなければならないわけではない", a:true },
+{q:" 誰もいない惑星にひとりで肉体を持っても愛の実践はできる ", a:false},
+{q:" 男女が神の前で互いに愛を誓って結婚した以上、離婚することは悪である ", a:false},
+{q:" 地位、名誉、財産は、それ自体が悪であるといえる ", a:false},
+{q:" 地球が愛の星になるにはビジョンの共有が重要である", a:true },
+{q:" 地球シフトアップに向けてビジョンの共有が重要である", a:true },
+{q:" 地球シフトアップに向けて、ビジョンの共有が重要である ", a:true },
+{q:" 地球は宇宙のDNAの宝庫と呼ばれている ", a:true },
+{q:" 地球には大日意識をはじめとする十次元霊が１３体いる ", a:false},
+{q:" 地球には大日意識をはじめとする十次元霊が３体いる ", a:false},
+{q:" 地球のアセンションが失敗しても、オーム宇宙の進化とは関係ない ", a:false},
+{q:" 地上に降りた九次元霊がサタンに負けることなどあり得ない", a:false},
+{q:" 地上の人間に、光の天使としての使命が明かされることがある ", a:true },
+{q:" 地上の人間が反省している時には、守護霊は休んでいてよい", a:false},
+{q:" 地上の人間が反省している時には、守護霊は休んでよい ", a:false},
+{q:" 中道とは頑張りすぎないことである", a:false},
+{q:" つかんでいるものがあると、そこに己心の魔が爪をかけることが多い", a:true },
+{q:" 天台大師に「一念三千」のインスピレーションを降ろしたのは仏陀である", a:true },
+{q:" どの病気にかかるかは、生まれる前にすでに決まっている", a:false},
+{q:" 肉体的欠陥を持って生まれるのは、過去世のカルマを刈り取るためである", a:false},
+{q:" 波長同通の法則とは無関係に行われるのが無差別憑依である", a:false},
+{q:" 八正道の「正しさの基準」は神の愛の方向かどうかである", a:true },
+{q:" 八正道以外の反省は、やってもあまり効果がない", a:false},
+{q:" 八正道の正しさの基準は、神の愛の方向かどうかということである", a:true },
+{q:" 反省で想念帯の曇りを晴らすことはできない ", a:false},
+{q:" 反省で間違いに気づいたら、神に詫びれば相手に謝らなくてもいい", a:false},
+{q:" 反省とは八正道に沿って行われなければならない ", a:false},
+{q:" 反省により想念帯に修正を加え、過去を変えることは可能である ", a:false},
+{q:" 反省は、新たなカルマの原因をつくらないことにつながる", a:true },
+{q:" 反省は毎日行うことが望ましい", a:true },
+{q:" 光の柱はアセンションのためであり、地獄霊の救済とは関係ない", a:false},
+{q:" 光の天使の使命が地上で変更になることはない ", a:false},
+{q:" ビジョンの共有は創造力と関係ない ", a:false},
+{q:" ビッグバンで創造された魂が、どの天体に宿るかはすべてオームが決めた", a:false},
+{q:" ビッグバンのあと、銀河意識、恒星意識、惑星意識の順につくられた", a:false},
+{q:" ひとり山にこもって愛の実践をするのは難しい ", a:true },
+{q:" 病気の時に反省しても、病気の原因がわかるわけではない ", a:false},
+{q:" ふつう過去世の記憶は潜在意識の中に存在する ", a:true },
+{q:" 分霊は独立しているので本体の魂の記憶を共有することはない ", a:false},
+{q:" 母性というのは、母親になった時に初めて発揮されるものである", a:false},
+{q:" 本来の魂のパートナーと結婚しなければ、愛を学ぶことはできない", a:false},
+{q:" 本来の魂のパートナーと結婚することが、地上の結婚生活の目的である ", a:false},
+{q:" まずは霊道を開くことが光の天使の果たす第一歩である ", a:false},
+{q:" マテリアル世界での波動が精妙になることをアセンションと呼ぶ", a:true },
+{q:" マルデックには当初、ルシのエネルギー体が宿っていた", a:false},
+{q:" 自らの愛の実践の記憶は一生忘れてはならない", a:false},
+{q:" 未来を心配しすぎても執着になる ", a:true },
+{q:" 未来を心配しすぎても執着にはならない", a:false},
+{q:" ムー文明の末期にもアセンションした人はいた ", a:false},
+{q:" 無差別憑依とは、波長導通の法則とは関係ない憑依である ", a:false},
+{q:" 唯一無二の個性を通して愛を実践するとき、最も神性がきらめく", a:true },
+{q:" 唯一無二の個性を通して愛を実践する時、神性が最もきらめく ", a:true },
+{q:" 世の中のためになるなら家庭で愛の実践をしなくてもよい", a:false},
+{q:" ルシが地獄に落ちた時、ルシに縁がある光の天使たちも落ちて行った ", a:true },
+{q:" ルシが地獄に落ちた時、魂のパートナーは天上界にいた", a:false},
+{q:" 霊道が開けばどんな霊能力も使えるようになる", a:false},
+{q:" 霊道を開くための修行は重要である", a:false},
+{q:" 霊道を開くと反省の必要がなくなる ", a:false},
+{q:" 霊道を開かなくても、少しはパーニャパラミッタが出てくることがある", a:true },
+{q:" 六次元から上の霊界を「天上界」と呼ぶ", a:true },
+{q:" 私たちが最もなすべきことは愛の実践である ", a:true },
+{q:" 私たちの魂はすべて、ビッグバンと同時に創造された", a:false},
+{q:" 私たちの魂はすべて、ビッグバンの時に神によって創造された", a:false},
+{q:" 愛の星地球となるためには、ビジョンを共有することが大切である", a:true },
+{q:" 愛の実践は、見返りを期待して行うべきではない", a:true },
+{q:" 魂グループでの転生輪廻は小学校レベルの魂修行に適したシステムである ", a:true },
+{q:" 私たちの魂は、創造されたときは男性体と女性体が一体だった ", a:true },
+{q:" 私利私欲で自らの道を選択することが、うずきに従うということである", a:false},
+{q:" 神の愛のエネルギーの流れを「スフィア」と呼ぶ ", a:true },
+{q:" 神の手足として働くために最も大切なのは謙虚さである", a:true },
+{q:" 第三の計画で仕事をすることで、その人の想念帯を黄金色に輝かせることが可能である ", a:true },
+{q:" 地球は究極の二元論を学ぶ惑星と呼ばれている ", a:true },
+{q:" 霊界での魂修行に役立つためにも、科学は存在する ", a:false}
+
+
+];
+
+
+let currentQ = [], wrongs = [], idx = 0, score = 0, timer, timeLeft = 60, retryMode = false;
+
+function goTo(id) {
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function startQ(num) {
+if(!document.getElementById('uname').value) return alert("ニックネームを入力してください");
+
+// ○(true)と×(false)を分離して分析
+const trueItems = data.filter(i => i.a === true).sort(() => Math.random() - 0.5);
+const falseItems = data.filter(i => i.a === false).sort(() => Math.random() - 0.5);
+
+let selected = [];
+if(num >= data.length) {
+// 全問挑戦の場合は単純に全データをシャッフル
+selected = [...data].sort(() => Math.random() - 0.5);
+} else {
+// ○×のバランスを5:5にする（×が足りない場合は○で補う）
+const targetX = Math.floor(num / 2);
+const countX = Math.min(targetX, falseItems.length);
+const countO = num - countX;
+selected = [...trueItems.slice(0, countO), ...falseItems.slice(0, countX)];
+selected.sort(() => Math.random() - 0.5); // 最後に混ぜる
+}
+
+currentQ = selected; idx = 0; score = 0; wrongs = []; retryMode = false;
+goTo('p-quiz'); render();
+}
+
+function render() {
+clearInterval(timer);
+const bar = document.getElementById('timer-bar');
+document.getElementById('q-text').innerText = (idx + 1) + ". " + currentQ[idx].q;
+
+if(!retryMode) {
+timeLeft = 60; bar.parentElement.style.display = 'block';
+timer = setInterval(() => {
+timeLeft -= 0.1; bar.style.width = (timeLeft / 60 * 100) + "%";
+if(timeLeft <= 0) handleAns(null);
+}, 100);
+} else { bar.parentElement.style.display = 'none'; }
+}
+
+function handleAns(val) {
+const isCorrect = val === currentQ[idx].a;
+if(retryMode) {
+const p = document.getElementById('p-quiz');
+p.classList.add(isCorrect ? 'fb-o' : 'fb-x');
+setTimeout(() => { p.classList.remove('fb-o', 'fb-x'); next(); }, 600);
+} else {
+if(isCorrect) score++; else wrongs.push(currentQ[idx]);
+next();
+}
+}
+
+function next() {
+idx++;
+if(idx < currentQ.length) render();
+else { clearInterval(timer); if(retryMode) location.reload(); else finish(); }
+}
+
+function finish() {
+goTo('p-res');
+document.getElementById('res-msg').innerText = `結果: ${score} / ${currentQ.length}`;
+const box = document.getElementById('judge-box');
+box.innerHTML = "";
+if(score / currentQ.length >= 0.8) {
+box.innerText = "合格"; box.className = "judge-wrap is-pass";
+for(let i=0; i<30; i++) {
+let p = document.createElement('div'); p.className = 'petal';
+p.style.left = Math.random()*100+"%"; p.style.animationDelay = Math.random()*2+"s";
+box.appendChild(p);
+}
+} else { box.innerText = "不合格"; box.className = "judge-wrap is-fail"; }
+}
+
+function retryWrongs() {
+if(wrongs.length === 0) return alert("全問正解です！");
+currentQ = [...wrongs]; idx = 0; score = 0; retryMode = true;
+goTo('p-quiz'); render();
+}
+</script>
+</body>
+</html>

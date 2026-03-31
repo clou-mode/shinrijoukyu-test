@@ -83,9 +83,8 @@ line-height: 1.8; border: 1px solid #eee; width: 100%; box-sizing: border-box;
 <span class="notice-title">【 注意事項 】</span>
 ① 各問題の制限時間は６０秒です。<br>
 ② 問題は、答え直すことはできません。<br>
-③ ８０％の正解で、合格となります。<br>
-④ 間違えた問題のみをやり直すことは出来ますが、正解ならば青い画面、間違いならば赤い画面になるだけです。<br>
-⑤ ランダムで問題が出題されますので、何度でも挑戦してみてください。
+③ 間違えた問題のみをやり直すことは出来ますが、正解ならば青い画面、間違いならば赤い画面になるだけです。<br>
+④ ランダムで問題が出題されますので、何度でも挑戦してみてください。
 </div>
 
 <div class="menu-grid">
@@ -365,13 +364,19 @@ document.getElementById('res-msg').innerText = `結果: ${score} / ${currentQ.le
 const box = document.getElementById('judge-box');
 box.innerHTML = "";
 if(score / currentQ.length >= 0.8) {
-box.innerText = "合格"; box.className = "judge-wrap is-pass";
+box.innerText = score + "問正解！！"; box.className = "judge-wrap is-pass";
 for(let i=0; i<30; i++) {
 let p = document.createElement('div'); p.className = 'petal';
 p.style.left = Math.random()*100+"%"; p.style.animationDelay = Math.random()*2+"s";
 box.appendChild(p);
 }
-} else { box.innerText = "不合格"; box.className = "judge-wrap is-fail"; }
+} else { box.innerText = score + "問正解！！"; box.className = "judge-wrap is-fail"; }
+if(wrongs.length > 0) {
+const msg = document.createElement('div');
+msg.style.cssText = "font-size:20px; font-weight:bold; color:#e74c3c; margin-top:16px;";
+msg.innerText = "また挑戦してね！次こそ全問正解☆";
+box.appendChild(msg);
+}
 }
 
 function retryWrongs() {

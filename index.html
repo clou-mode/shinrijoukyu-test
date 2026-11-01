@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>神理上級テスト</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神理 上級テスト ○×クイズ</title>
 <script>
       document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
@@ -22,411 +22,1218 @@
     </script>
 </head>
 <body>
-    <style>
-        :root { --rainbow: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Hiragino Mincho ProN", serif; background: #fff; overflow: hidden; touch-action: manipulation; }
-        .page { display: none; width: 100%; height: 100dvh; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; box-sizing: border-box; padding: 20px; }
-        .active { display: flex; }
-        #p1 { justify-content: center; text-align: center; }
-        .p1-main { font-size: 45px; font-weight: bold; margin: 10px 0; letter-spacing: 5px; color: #000; }
-        .btn-rainbow { background: var(--rainbow); color: #fff; border: 2px solid #fff; padding: 18px 80px; font-size: 28px; font-weight: 900; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); margin-top: 40px; }
-        .form-container { width: 100%; max-width: 450px; }
-        label { font-weight: bold; font-size: 18px; display: block; margin-bottom: 8px; text-align: left; }
-        input { width: 100%; padding: 15px; font-size: 20px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .notice-box { text-align: left; font-size: 15px; color: #333; background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 25px; line-height: 1.8; border: 1px solid #eee; width: 100%; box-sizing: border-box; }
-        .notice-title { font-weight: bold; font-size: 17px; display: block; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-        .menu-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .menu-btn { padding: 18px; background: #f0f2f5; border: 1px solid #dcdfe6; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; text-align: center; }
-        #p-quiz { padding: 0; align-items: stretch; transition: background-color .12s linear; }
-        #p-quiz.flash-correct { background: #d8efff; }
-        #p-quiz.flash-wrong   { background: #ffd9d9; }
-        #timer-bg { width: 100%; height: 12px; background: #eee; }
-        #timer-bar { height: 100%; background: blue; width: 100%; transition: width 0.1s linear; }
-        .q-area { font-size: 24px; font-weight: bold; padding: 40px 20px; flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.6; color: #000; }
-        .ox-box { display: flex; width: 100%; height: 45vh; border-top: 2px solid #eee; }
-        .ox-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 100px; cursor: pointer; -webkit-user-select: none; }
-        .o-btn { color: red; border-right: 1px solid #eee; background: #fffafa; }
-        .x-btn { color: blue; background: #fafaff; }
-        #p-res { align-items: center; text-align: center; justify-content: center; overflow: hidden; position: relative; }
-        #p-res.pass { background: radial-gradient(ellipse at 50% 30%, #fff9e6 0%, #fff3b0 40%, #ffd740 100%); }
-        #p-res.fail { background: #efefef; }
-        .judge-wrap { font-size: 65px; font-weight: bold; margin: 30px 0; }
-        
-        /* 華やかな演出スタイル (index1風) */
-        .result-crown { font-size: 60px; line-height: 1; margin-bottom: 8px; animation: crownBounce 1s ease infinite alternate; display: none; }
-        #p-res.pass .result-crown { display: block; }
-        @keyframes crownBounce { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-8px) rotate(5deg); } }
-        .result-badge.pass { background: linear-gradient(90deg, #ff1744, #ff9100, #ffee58, #00c853, #00b0ff, #d500f9); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: rainbowFlow 3s linear infinite, scorePop .5s cubic-bezier(.34,1.56,.64,1) both; }
-        @keyframes rainbowFlow { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-        @keyframes scorePop { 0% { transform: scale(0.4) rotate(-8deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
-        .result-stars { font-size: 28px; letter-spacing: .3em; margin-bottom: 12px; display: none; animation: starPulse 1.5s ease infinite alternate; }
-        #p-res.pass .result-stars { display: block; }
-        @keyframes starPulse { from { opacity: 0.7; transform: scale(1); } to { opacity: 1; transform: scale(1.08); } }
-        
-        /* コンフェッティ・花火エフェクト */
-        .confetti { pointer-events: none; position: absolute; inset: 0; overflow: hidden; z-index: 1; display: none; }
-        .confetti.show { display: block; }
-        .confetti-piece { position: absolute; top: -40px; opacity: .92; animation-name: confettiFall; animation-timing-function: linear; animation-iteration-count: infinite; border-radius: 2px; }
-        @keyframes confettiFall { 0% { transform: translateY(-40px) rotate(0deg) translateX(0); } 50% { transform: translateY(50dvh) rotate(400deg) translateX(30px); } 100% { transform: translateY(110dvh) rotate(720deg) translateX(-20px); } }
-        .confetti-piece.petal { border-radius: 50% 0 50% 0; }
-        .confetti-piece.star { clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
-        .firework { pointer-events: none; position: absolute; inset: 0; z-index: 1; display: none; }
-        .firework.show { display: block; }
-        .spark { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: sparkFly 1.4s ease-out forwards; }
-        @keyframes sparkFly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
-    </style>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --blue: #1976d2;
+      --light-blue: #42a5f5;
+      --red: #d50000;
+      --gray: #666;
+      --bg-gray: #efefef;
+      --ok-bg: #d8efff;
+      --ng-bg: #ffd9d9;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: #fff;
+      color: #111;
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "游明朝", serif;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    body { overflow-x: hidden; }
+
+    button, input { font-family: inherit; }
+
+    button {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: #0b57d0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    .screen {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .screen.active { display: flex; }
+
+    /* ドア演出 */
+    .door-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      display: none;
+      overflow: hidden;
+    }
+
+    .door-transition.active { display: block; }
+
+    .door-panel {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(180deg, #4a148c 0%, #311b92 50%, #1a237e 100%);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.08);
+    }
+
+    .door-left {
+      left: 0;
+      border-right: 2px solid rgba(255,255,255,.2);
+      animation: openLeftDoor .8s ease forwards;
+    }
+
+    .door-right {
+      right: 0;
+      border-left: 2px solid rgba(255,255,255,.2);
+      animation: openRightDoor .8s ease forwards;
+    }
+
+    .door-panel::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 28px;
+      height: 28px;
+      margin-top: -14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff9c4, #f9a825);
+      box-shadow: 0 0 14px rgba(249,168,37,.6);
+    }
+
+    .door-left::before { right: 26px; }
+    .door-right::before { left: 26px; }
+
+    @keyframes openLeftDoor {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+
+    @keyframes openRightDoor {
+      from { transform: translateX(0); }
+      to { transform: translateX(100%); }
+    }
+
+    /* ランディング画面 */
+    #landing-screen {
+      background: #fff;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding:
+        max(20px, var(--safe-top))
+        max(16px, var(--safe-right))
+        max(20px, var(--safe-bottom))
+        max(16px, var(--safe-left));
+    }
+
+    .landing-inner {
+      width: min(100%, 1000px);
+      margin: 0 auto;
+    }
+
+    .title-line-1 {
+      font-size: clamp(20px, 5vw, 40px);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.4;
+      letter-spacing: .12em;
+    }
+
+    .title-line-2 {
+      font-size: clamp(16px, 4.2vw, 28px);
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .title-line-3 {
+      font-size: clamp(52px, 14vw, 110px);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      letter-spacing: .08em;
+      word-break: keep-all;
+    }
+
+    .title-line-4 {
+      font-size: clamp(24px, 6vw, 50px);
+      font-weight: 900;
+      margin-bottom: 36px;
+      letter-spacing: .06em;
+      color: #4a148c;
+    }
+
+    ruby rt { font-size: 0.45em; }
+
+    .rainbow-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 18px 44px;
+      min-height: 56px;
+      font-size: clamp(24px, 6vw, 44px);
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(90deg, #ff1744, #ff9100, #ffee58, #00c853, #00b0ff, #304ffe, #d500f9);
+      background-size: 300% 300%;
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
+      animation: rainbowFlow 5s linear infinite;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .rainbow-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 18px 38px rgba(0,0,0,.24);
+    }
+
+    @keyframes rainbowFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    /* メニュー画面 */
+    #menu-screen {
+      background: #fff;
+      align-items: center;
+      justify-content: center;
+      padding:
+        max(16px, var(--safe-top))
+        max(12px, var(--safe-right))
+        max(16px, var(--safe-bottom))
+        max(12px, var(--safe-left));
+    }
+
+    .menu-card {
+      width: min(100%, 920px);
+      background: #fff;
+      border: 1px solid #e3e3e3;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.07);
+      padding: clamp(16px, 4vw, 28px);
+      max-height: 96dvh;
+      overflow-y: auto;
+    }
+
+    .menu-title {
+      text-align: center;
+      font-size: clamp(22px, 5.5vw, 40px);
+      font-weight: 900;
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    .form-row { margin-bottom: 18px; }
+
+    .label {
+      display: block;
+      font-size: clamp(16px, 4.2vw, 20px);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .nickname-input {
+      width: 100%;
+      font-size: clamp(16px, 4.2vw, 22px);
+      padding: 14px 16px;
+      border: 2px solid #cfcfcf;
+      border-radius: 14px;
+      outline: none;
+    }
+
+    .nickname-input:focus {
+      border-color: #4a148c;
+      box-shadow: 0 0 0 4px rgba(74,20,140,.12);
+    }
+
+    .error-text {
+      color: #d32f2f;
+      font-size: 14px;
+      min-height: 20px;
+      margin-top: 8px;
+    }
+
+    .menu-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+
+    .menu-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 18px 14px;
+      min-height: 64px;
+      font-size: clamp(16px, 4vw, 21px);
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4a148c, #7b1fa2);
+      box-shadow: 0 8px 24px rgba(74,20,140,.22);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(74,20,140,.30);
+    }
+
+    .menu-btn.practice {
+      background: linear-gradient(135deg, #1565c0, #42a5f5);
+      box-shadow: 0 8px 24px rgba(21,101,192,.24);
+    }
+
+    .menu-btn.all {
+      background: linear-gradient(135deg, #b71c1c, #ef5350);
+      box-shadow: 0 8px 24px rgba(183,28,28,.24);
+      grid-column: 1 / -1;
+    }
+
+    .notes {
+      border-radius: 18px;
+      background: #faf7ff;
+      border: 1px solid #e1d5f5;
+      padding: clamp(14px, 3.5vw, 20px);
+      line-height: 1.9;
+      font-size: clamp(15px, 4vw, 18px);
+    }
+
+    .notes-title {
+      font-weight: 900;
+      font-size: clamp(18px, 4.6vw, 22px);
+      margin-bottom: 8px;
+    }
+
+    /* クイズ画面 */
+    #quiz-screen {
+      background: #fff;
+      align-items: stretch;
+      justify-content: stretch;
+      transition: background-color .12s linear;
+    }
+
+    #quiz-screen.flash-correct { background: var(--ok-bg); }
+    #quiz-screen.flash-wrong { background: var(--ng-bg); }
+
+    .quiz-wrap {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding:
+        max(8px, var(--safe-top))
+        max(8px, var(--safe-right))
+        max(8px, var(--safe-bottom))
+        max(8px, var(--safe-left));
+    }
+
+    .quiz-top { padding: 8px 8px 0; }
+    .timer-wrap { width: 100%; }
+
+    .timer-bar-bg {
+      width: 100%;
+      height: clamp(16px, 3.5vw, 24px);
+      background: #fff;
+      border: 2px solid #d8d8d8;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .timer-bar {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ce93d8, #4a148c);
+      transition: width .1s linear;
+    }
+
+    .question-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 4vw, 34px) clamp(10px, 3vw, 20px) 12px;
+      overflow-y: auto;
+    }
+
+    .question-text {
+      width: min(100%, 1200px);
+      text-align: center;
+      font-weight: 700;
+      line-height: 1.65;
+      font-size: clamp(22px, 5.4vw, 48px);
+      user-select: none;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      letter-spacing: .02em;
+      padding: 0.3em 0.5em;
+      border-radius: 14px;
+      background: rgba(243, 237, 255, 0.75);
+      box-shadow: 0 2px 12px rgba(74, 20, 140, 0.08);
+    }
+
+    .answer-row {
+      width: 100%;
+      min-height: 30vh;
+      height: 34vh;
+      display: flex;
+      border-top: 2px solid #ddd;
+      margin-top: auto;
+    }
+
+    .answer-btn {
+      width: 50%;
+      height: 100%;
+      border: none;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: clamp(64px, 18vw, 180px);
+      background: #fff;
+      transition: background .15s ease, transform .05s ease, opacity .15s ease;
+      user-select: none;
+    }
+
+    .answer-btn:active { transform: scale(.995); }
+    .answer-btn[disabled] { opacity: .78; cursor: default; }
+    .answer-btn.maru { color: var(--red); }
+    .answer-btn.batsu { color: #1565c0; border-left: 2px solid #ddd; }
+
+    /* ========================================
+       リザルト画面 — 金ピカ・紙吹雪バージョン
+       ======================================== */
+    #result-screen {
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding:
+        max(20px, var(--safe-top))
+        max(16px, var(--safe-right))
+        max(20px, var(--safe-bottom))
+        max(16px, var(--safe-left));
+      overflow: hidden;
+      /* 金ピカグラデーション背景 */
+      background: radial-gradient(ellipse at 50% 30%, #fffae6 0%, #ffe57f 35%, #ffc107 70%, #ff8f00 100%);
+    }
+
+    .result-inner {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 1100px);
+    }
+
+    /* 王冠アイコン */
+    .result-crown {
+      font-size: clamp(40px, 10vw, 80px);
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: crownBounce 1s ease infinite alternate;
+      display: block;
+    }
+
+    @keyframes crownBounce {
+      from { transform: translateY(0) rotate(-5deg); }
+      to   { transform: translateY(-8px) rotate(5deg); }
+    }
+
+    .result-message {
+      font-size: clamp(18px, 4vw, 36px);
+      font-weight: 900;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      color: #3e2723;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    }
+
+    /* 正解数バッジ — レインボーグラデーション文字 */
+    .result-badge {
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 20px;
+      letter-spacing: .08em;
+      font-size: clamp(60px, 16vw, 180px);
+      background: linear-gradient(90deg, #ff1744, #ff9100, #ffee58, #00c853, #00b0ff, #d500f9);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: rainbowFlow 3s linear infinite, scorePop .5s cubic-bezier(.34,1.56,.64,1) both;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,.2));
+    }
+
+    @keyframes scorePop {
+      0%   { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg);    opacity: 1; }
+    }
+
+    @keyframes rainbowFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    /* スター装飾 */
+    .result-stars {
+      font-size: clamp(20px, 4vw, 36px);
+      letter-spacing: .3em;
+      margin-bottom: 12px;
+      display: block;
+      animation: starPulse 1.5s ease infinite alternate;
+    }
+
+    @keyframes starPulse {
+      from { opacity: 0.7; transform: scale(1); }
+      to   { opacity: 1;   transform: scale(1.08); }
+    }
+
+    .result-challenge {
+      font-size: clamp(16px, 4vw, 24px);
+      font-weight: 900;
+      color: #b71c1c;
+      margin-bottom: 20px;
+      min-height: 1.6em;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    }
+
+    .result-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-links a {
+      font-size: clamp(16px, 4.5vw, 20pt);
+      font-weight: 700;
+      line-height: 1.8;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 20px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* ========================================
+       コンフェッティ（紙吹雪舞う演出）
+       ======================================== */
+    .confetti {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 1;
+      display: none;
+    }
+
+    .confetti.show { display: block; }
+
+    .confetti-piece {
+      position: absolute;
+      top: -40px;
+      opacity: .92;
+      animation-name: confettiFall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      border-radius: 2px;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(-40px) rotate(0deg) translateX(0); }
+      50%  { transform: translateY(50dvh)  rotate(400deg) translateX(30px); }
+      100% { transform: translateY(110dvh) rotate(720deg) translateX(-20px); }
+    }
+
+    /* 花びら型 */
+    .confetti-piece.petal {
+      border-radius: 50% 0 50% 0;
+    }
+
+    /* 星型 */
+    .confetti-piece.star {
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    }
+
+    /* ========================================
+       花火バースト
+       ======================================== */
+    .firework {
+      pointer-events: none;
+      position: absolute;
+      z-index: 1;
+      display: none;
+    }
+
+    .firework.show { display: block; }
+
+    .spark {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: sparkFly 1.4s ease-out forwards;
+    }
+
+    @keyframes sparkFly {
+      0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 1024px) {
+      .menu-buttons { grid-template-columns: 1fr 1fr; }
+      .answer-row { height: 32vh; }
+    }
+
+    @media (max-width: 768px) {
+      .menu-buttons { grid-template-columns: 1fr; }
+      .menu-btn { padding: 16px 12px; }
+      .menu-btn.all { grid-column: auto; }
+      .question-box { align-items: center; padding-top: 18px; }
+      .question-text { width: 100%; max-width: 100%; }
+      .answer-row { min-height: 28vh; height: 30vh; }
+    }
+
+    @media (max-width: 480px) {
+      .title-line-3 { letter-spacing: .04em; }
+      .rainbow-btn { width: 100%; max-width: 260px; padding: 16px 24px; }
+      .menu-card { border-radius: 16px; }
+      .question-text { font-size: clamp(20px, 5.8vw, 28px); line-height: 1.65; }
+      .answer-row { min-height: 26vh; height: 28vh; }
+      .answer-btn { font-size: clamp(58px, 20vw, 96px); }
+      .result-links a { font-size: 18px; }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      .quiz-wrap {
+        padding-top: max(6px, var(--safe-top));
+        padding-bottom: max(6px, var(--safe-bottom));
+      }
+      .question-box { padding-top: 10px; padding-bottom: 8px; }
+      .question-text { font-size: clamp(18px, 3.2vw, 30px); line-height: 1.65; }
+      .answer-row { min-height: 36vh; height: 40vh; }
+      .answer-btn { font-size: clamp(52px, 12vw, 110px); }
+    }
+  </style>
 </head>
 <body>
+  <div id="door-transition" class="door-transition">
+    <div class="door-panel door-left"></div>
+    <div class="door-panel door-right"></div>
+  </div>
 
-<div id="p1" class="page active">
-    <div class="p1-main">神理</div>
-    <div class="p1-main">”上級テスト”</div>
-    <button class="btn-rainbow" onclick="goTo('p2')">入口</button>
-</div>
-
-<div id="p2" class="page">
-    <div class="form-container">
-        <label>ニックネーム（必須）</label>
-        <input type="text" id="uname" placeholder="例：光の探究者">
-        <div class="notice-box">
-            <span class="notice-title">【 注意事項 】</span>
-            ① 制限時間：60秒<br>
-            ② 80％正解で合格<br>
-            ③ 間違えた問題のみやり直し可能
-        </div>
-        <div class="menu-grid">
-            <button class="menu-btn" onclick="startQ(10)">🔷 10問挑戦</button>
-            <button class="menu-btn" onclick="startQ(172)">🔥 全問挑戦</button>
-        </div>
+  <section id="landing-screen" class="screen active">
+    <div class="landing-inner">
+      <div class="title-line-1">上級者求む！！</div>
+      <div class="title-line-2">
+        <ruby>神<rt>かみ</rt></ruby>の<ruby>理<rt>ことわり</rt></ruby>と書いて
+      </div>
+      <div class="title-line-3">神理</div>
+      <div class="title-line-4">上級テスト</div>
+      <button id="enter-btn" class="rainbow-btn">入口</button>
     </div>
-</div>
+  </section>
 
-<div id="p-quiz" class="page">
-    <div id="timer-bg"><div id="timer-bar"></div></div>
-    <div id="q-text" class="q-area"></div>
-    <div class="ox-box">
-        <div class="ox-btn o-btn" onclick="handleAns(true)">○</div>
-        <div class="ox-btn x-btn" onclick="handleAns(false)">×</div>
+  <section id="menu-screen" class="screen">
+    <div class="menu-card">
+      <div class="menu-title">○×クイズ 出題選択</div>
+
+      <div class="form-row">
+        <label for="nickname" class="label">ニックネーム（必須）</label>
+        <input id="nickname" class="nickname-input" type="text" maxlength="40" placeholder="ニックネームを入力してください" />
+        <div id="nickname-error" class="error-text"></div>
+      </div>
+
+      <div class="notes">
+        <div class="notes-title">各問題を解くときの注意点</div>
+        ① 各問題の制限時間は６０秒です。<br>
+        ② 問題は、答え直すことはできません。<br>
+        ③ 間違えた問題のみをやり直すことは出来ますが、正解ならば青い画面、間違いならば赤い画面になるだけです。<br>
+        ④ ランダムで問題が出題されますので、何度でも挑戦してみてください。
+      </div>
+
+      <div class="menu-buttons">
+        <button class="menu-btn practice" data-count="10">🔷 10問挑戦</button>
+        <button class="menu-btn" data-count="30">🔶 30問挑戦</button>
+        <button class="menu-btn" data-count="50">💎 50問挑戦</button>
+        <button class="menu-btn all" data-count="9999">🔥 全問挑戦（172問）</button>
+      </div>
     </div>
-</div>
+  </section>
 
-<div id="p-res" class="page">
+  <section id="quiz-screen" class="screen">
+    <div class="quiz-wrap">
+      <div class="quiz-top">
+        <div id="timer-wrap" class="timer-wrap">
+          <div class="timer-bar-bg">
+            <div id="timer-bar" class="timer-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-box">
+        <div id="question-text" class="question-text"></div>
+      </div>
+
+      <div class="answer-row">
+        <button id="maru-btn" class="answer-btn maru" aria-label="○">○</button>
+        <button id="batsu-btn" class="answer-btn batsu" aria-label="×">×</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="result-screen" class="screen">
     <div id="confetti" class="confetti"></div>
     <div id="firework" class="firework"></div>
-    <div style="position:relative; z-index:2;">
-        <div class="result-crown">👑</div>
-        <div id="res-msg" style="font-size:22px; margin-top:10px; font-weight: bold;"></div>
-        <div id="judge-box" class="judge-wrap result-badge"></div>
-        <div class="result-stars">✨ ⭐ ✨ ⭐ ✨</div>
-        <div style="font-size:20px; color:blue; cursor:pointer; margin-top:20px;" onclick="location.reload()">ホームに戻る</div>
+    <div class="result-inner">
+      <div class="result-crown">👑</div>
+      <div id="result-message" class="result-message"></div>
+      <div id="result-badge" class="result-badge"></div>
+      <div class="result-stars">✨ ⭐ ✨ ⭐ ✨</div>
+      <div id="result-challenge" class="result-challenge"></div>
+      <div class="result-links">
+        <a id="retry-link">間違った問題を再度解き直す</a>
+        <a id="home-link">ホーム画面に戻る</a>
+      </div>
     </div>
-</div>
+  </section>
 
-<script>
-const data = [
-{q:" 「女性の法」は、女性のための法であり、男性は学ばなくてもよい", a:false},
-{q:" １９７０年日本には九次元霊が二人肉体を持っていた", a:true},
+  <script>
+    // ===== 問題データ（上級 172問） =====
+    const allQuestions = [
+      {q:"「女性の法」は、女性のための法であり、男性は学ばなくてもよい ", a:false},
+{q:"１９７０年日本には九次元霊が二人肉体を持っていた", a:true},
 {q:"愛とはエネルギーである", a:true},
-{q:" 愛は人びとの間を循環しながら大きなうねりとなる", a:true},
-{q:" 愛は実践を通して表現すべきものである ", a:true},
-{q:" 相手を裁くことは、その人の成長を阻害することにつながる", a:true},
-{q:" 愛を実践することは愛の通路となることである", a:true},
-{q:" 愛の実践のためには反省は必要ではない ", a:false},
-{q:" アガシャーは十三次元意識で、アンドロメダ銀河も担当している", a:true},
-{q:" アセンション後、三次元地球文明は石器時代からやり直しとなる ", a:true},
-{q:" アセンション後も素粒子そのものは変化しない", a:true },
-{q:" アセンション後は結婚という形態がなくなる ", a:false},
-{q:" アセンション後にどんな仕事をするかは上からの命令で決まる ", a:false},
-{q:" 甘えにつながるので自分自身を赦してはいけない", a:false},
-{q:" あまりやりすぎず、適当なところで妥協するのが中道の極意である", a:false},
-{q:" 新たなカルマをつくらないためにも反省は重要である", a:true},
-{q:" アラハンの修行を終えた人は霊道を開くことができる", a:false },
-{q:" アラハンを超えると誰でも霊道を開くことができる", a:false },
-{q:" 宇宙に偏在する愛のエネルギーとは「ダークエネルギー」のことである", a:true},
-{q:" 生まれ落ちる境遇は、生まれる前の自分には決定権はない", a:false},
-{q:" 多くの人びとから愛を与えられれば幸せな一生となる", a:false },
-{q:" 多くの人びとから愛を与えられれば幸せになれる", a:false },
-{q:" オーム宇宙の最後は超新星爆発に似た姿をとる", a:true},
-{q:" オーム宇宙の人格霊は、ヒューマノイド型の肉体に宿ることが多い", a:true},
-{q:" オーム宇宙の最期は超新星爆発に似た姿をとる", a:true},
-{q:" オーム神霊がルシをつくったため、人びとが悪に手を染めるようになった ", a:false },
-{q:" オームとは「破壊し、創造するもの」という意味である ", a:true},
-{q:" オーム宇宙が膨張を続ける速さは次第に減少している ", a:false},
-{q:" オーム宇宙は巨大な球体で膨張を続けている", a:false},
-{q:" オーム神霊がビッグバンで宇宙を作ったのは今回が初めてである ", a:false},
-{q:" 幼くして亡くなった子どもの魂は純粋なので、必ず天上界に還っている ", a:false},
-{q:" 親は子どもに「親に感謝しなさい」と教えなければならない", a:false},
-{q:" 親は我が子を自分の所有物とみなしてもよい ", a:false},
-{q:" 親への感謝の気持ちは親に対する愛の実践で返すことが望ましい", a:true},
-{q:" オリオン出身の両性具有体は、将来、母星で男性体と女性体に引き裂かれる予定である", a:true},
-{q:" 科学の発展が魔に利用されることもある ", a:true},
-{q:" 科学も芸術も、霊界からのインスピレーションで地上に降ろされる ", a:true},
-{q:" 過去世で蓄えられた智慧を「パーニャパラミッタ」と呼ぶ ", a:true},
-{q:" 過去の自らの愛の実践は忘れても構わない", a:true},
-{q:" 過去世で殺した相手から、今後は殺されなければカルマは返せない", a:false},
-{q:" 火星に住んでいた人類の魂が地球で転生することはない", a:false},
-{q:" 神に対する感謝の思いがあるならば、愛の実践でお返しすべきである", a:true},
-{q:" 神に近づけば近づくほど個性の色がなくなり、無色に近くなる", a:false},
-{q:" 神に近づけば近づくほど個性の色はなくなり透明になる", a:false},
-{q:" 神へと続く道をどんどん進むと個性の色は無色になってくる", a:false},
-{q:" カルマの刈り取りはこの世の人生の目的のすべてである ", a:false},
-{q:" カルマの刈り取りのためには反省はいらない ", a:false},
-{q:" カルマの刈り取りは自力で行うもので、守護霊は助けてはならない ", a:false},
-{q:" カルマの刈り取りができないような人生設計を立てて生まれてくることもある", a:false},
-{q:" カルマの刈り取りができないような人生設計を立てて生まれることもある ", a:false},
-{q:" 救済運動の中心にいる人は魔にねらわれることはない", a:false},
-{q:" 銀色光線の魂は、マテリアル世界がないと力を発揮することができない", a:true},
-{q:" 九次元霊でなければ救世主の仕事とをすることはできない", a:false},
-{q:" 九次元霊の地上での使命は取り上げられることはない ", a:false},
-{q:" 九次元霊は地上でカルマの刈り取りをする必要はない", a:false},
-{q:" 原因結果の法則は、今世だけで成り立つ法則である ", a:false},
-{q:" 弦楽器の弦の張り方の強さのたとえ話で、「中道」が理解しやすくなる ", a:true},
-{q:" 現在、地球にいる九次元霊は全部で１２人である", a:true},
-{q:" 己心の魔は、本人のカルマに関係することが多い ", a:true},
-{q:" この世で得た財産はあの世に持って帰れないが、名誉は持って帰れる", a:false},
-{q:" これだけは絶対手放せないというものが、誰にでも必ずある", a:false},
-{q:" 今回のビッグバン以前の宇宙から個性として存在していた人格霊もいる", a:true},
-{q:" 今回のビッグバンの前のオーム宇宙でも、ルシという魂は存在していた", a:true},
-{q:" 今世で新たなカルマをつくらないためにも反省はすべきである", a:true},
-{q:" 今世の初期条件はカルマと関係が深い", a:true},
-{q:" ゴンドワナ文明で、根本法として「女性の法」が解かれたことがある", a:false},
-{q:" 最初から男性体のみとしてつくられた魂も存在する ", a:false},
-{q:" 自殺者の霊は地縛霊となることが多い ", a:true},
-{q:" 指導霊が途中で入れ替わることはない", a:false},
-{q:" 地縛霊は多かれ少なかれ地上への執着を持っている", a:true},
-{q:" 社会改革のためには陽のエネルギーが必要である", a:true},
-{q:" 十次元霊がペアで入っていない惑星もある", a:false},
-{q:" 女性の献身的な支えがあってこそ、男性は自分の才能を開花できる ", a:true },
-{q:" 人格霊で聖アントニウスと交信できるのは九次元上段階の５人のみ", a:false},
-{q:" 人格霊であっても、ヒューマノイド型の肉体に宿るのは少数である ", a:false},
-{q:" 人生で、時限爆弾が爆発するように病気になることはない", a:false},
-{q:" 神理は学ぶことが重要で、実践はそれほど重要ではない ", a:false},
-{q:" 神理を学べば愛の実践はしなくてもよい ", a:false},
-{q:" すべての惑星の衛星に陰のエネルギーが宿っている ", a:false},
-{q:" すべての人に、カルマの刈り取り以外の使命が与えられている", a:false},
-{q:" 生命エネルギーの注入がうまくできず、早期に病気で他界することもある", a:true },
-{q:" セレニティは人格霊だったことはない ", a:false},
-{q:" 戦闘系は愛を表現するのが苦手である ", a:false},
-{q:" 前文明で奴隷を虐待していた者は、今文明で奴隷に生まれることもある", a:true },
-{q:" 想念帯の曇りは守護霊からのインスピレーションを阻害する ", a:true },
-{q:" 想念帯の曇りを取り除くために、反省は有効である", a:true },
-{q:" 想念帯は表面意識と潜在意識の間に存在する", a:true },
-{q:" 第三の計画で、最も遅くメッセージを降ろした九次元霊はゾロアスターである", a:false},
-{q:" 胎児期に蓄積されるエネルギーが「生体エネルギー」である", a:true },
-{q:" 大天使ミカエルはドイツ人として生まれたあと、日本人として生まれた ", a:true },
-{q:" 他人のカルマを背負って生まれてくることはない", a:true },
-{q:" 他人のカルマを背負って生まれてくる場合もある", a:false},
-{q:" 他人を裁いてはいけないが、自分を裁くことは反省といえる ", a:false},
-{q:" 魂の兄弟グループの組み換えが起こることがある", a:true },
-{q:" 魂のパートナーと同時期に地上に生まれることはできない ", a:false},
-{q:" 魂の本来のパートナーは、原則九次元霊になるとわかる ", a:true },
-{q:" 魂の兄弟の組み換えが起こることはない ", a:false},
-{q:" 誰でも愛の通路となれるわけではない", a:false},
-{q:" 誰でも努力を続ければ、いつかは九次元霊になれる可能性がある", a:true },
-{q:" 誰でも地上で結婚しなければならないわけではない", a:true },
-{q:" 誰もいない惑星にひとりで肉体を持っても愛の実践はできる ", a:false},
-{q:" 男女が神の前で互いに愛を誓って結婚した以上、離婚することは悪である ", a:false},
-{q:" 地位、名誉、財産は、それ自体が悪であるといえる ", a:false},
-{q:" 地球が愛の星になるにはビジョンの共有が重要である", a:true },
-{q:" 地球シフトアップに向けてビジョンの共有が重要である", a:true },
-{q:" 地球シフトアップに向けて、ビジョンの共有が重要である ", a:true },
-{q:" 地球は宇宙のDNAの宝庫と呼ばれている ", a:true },
-{q:" 地球には大日意識をはじめとする十次元霊が１３体いる ", a:false},
-{q:" 地球には大日意識をはじめとする十次元霊が３体いる ", a:false},
-{q:" 地球のアセンションが失敗しても、オーム宇宙の進化とは関係ない ", a:false},
-{q:" 地上に降りた九次元霊がサタンに負けることなどあり得ない", a:false},
-{q:" 地上の人間に、光の天使としての使命が明かされることがある ", a:true },
-{q:" 地上の人間が反省している時には、守護霊は休んでいてよい", a:false},
-{q:" 地上の人間が反省している時には、守護霊は休んでよい ", a:false},
-{q:" 中道とは頑張りすぎないことである", a:false},
-{q:" つかんでいるものがあると、そこに己心の魔が爪をかけることが多い", a:true },
-{q:" 天台大師に「一念三千」のインスピレーションを降ろしたのは仏陀である", a:true },
-{q:" どの病気にかかるかは、生まれる前にすでに決まっている", a:false},
-{q:" 肉体的欠陥を持って生まれるのは、過去世のカルマを刈り取るためである", a:false},
-{q:" 波長同通の法則とは無関係に行われるのが無差別憑依である", a:false},
-{q:" 八正道の「正しさの基準」は神の愛の方向かどうかである", a:true },
-{q:" 八正道以外の反省は、やってもあまり効果がない", a:false},
-{q:" 八正道の正しさの基準は、神の愛の方向かどうかということである", a:true },
-{q:" 反省で想念帯の曇りを晴らすことはできない ", a:false},
-{q:" 反省で間違いに気づいたら、神に詫びれば相手に謝らなくてもいい", a:false},
-{q:" 反省とは八正道に沿って行われなければならない ", a:false},
-{q:" 反省により想念帯に修正を加え、過去を変えることは可能である ", a:false},
-{q:" 反省は、新たなカルマの原因をつくらないことにつながる", a:true },
-{q:" 反省は毎日行うことが望ましい", a:true },
-{q:" 光の柱はアセンションのためであり、地獄霊の救済とは関係ない", a:false},
-{q:" 光の天使の使命が地上で変更になることはない ", a:false},
-{q:" ビジョンの共有は創造力と関係ない ", a:false},
-{q:" ビッグバンで創造された魂が、どの天体に宿るかはすべてオームが決めた", a:false},
-{q:" ビッグバンのあと、銀河意識、恒星意識、惑星意識の順につくられた", a:false},
-{q:" ひとり山にこもって愛の実践をするのは難しい ", a:true },
-{q:" 病気の時に反省しても、病気の原因がわかるわけではない ", a:false},
-{q:" ふつう過去世の記憶は潜在意識の中に存在する ", a:true },
-{q:" 分霊は独立しているので本体の魂の記憶を共有することはない ", a:false},
-{q:" 母性というのは、母親になった時に初めて発揮されるものである", a:false},
-{q:" 本来の魂のパートナーと結婚しなければ、愛を学ぶことはできない", a:false},
-{q:" 本来の魂のパートナーと結婚することが、地上の結婚生活の目的である ", a:false},
-{q:" まずは霊道を開くことが光の天使の果たす第一歩である ", a:false},
-{q:" マテリアル世界での波動が精妙になることをアセンションと呼ぶ", a:true },
-{q:" マルデックには当初、ルシのエネルギー体が宿っていた", a:false},
-{q:" 自らの愛の実践の記憶は一生忘れてはならない", a:false},
-{q:" 未来を心配しすぎても執着になる ", a:true },
-{q:" 未来を心配しすぎても執着にはならない", a:false},
-{q:" ムー文明の末期にもアセンションした人はいた ", a:false},
-{q:" 無差別憑依とは、波長導通の法則とは関係ない憑依である ", a:false},
-{q:" 唯一無二の個性を通して愛を実践するとき、最も神性がきらめく", a:true },
-{q:" 唯一無二の個性を通して愛を実践する時、神性が最もきらめく ", a:true },
-{q:" 世の中のためになるなら家庭で愛の実践をしなくてもよい", a:false},
-{q:" ルシが地獄に落ちた時、ルシに縁がある光の天使たちも落ちて行った ", a:true },
-{q:" ルシが地獄に落ちた時、魂のパートナーは天上界にいた", a:false},
-{q:" 霊道が開けばどんな霊能力も使えるようになる", a:false},
-{q:" 霊道を開くための修行は重要である", a:false},
-{q:" 霊道を開くと反省の必要がなくなる ", a:false},
-{q:" 霊道を開かなくても、少しはパーニャパラミッタが出てくることがある", a:true },
-{q:" 六次元から上の霊界を「天上界」と呼ぶ", a:true },
-{q:" 私たちが最もなすべきことは愛の実践である ", a:true },
-{q:" 私たちの魂はすべて、ビッグバンと同時に創造された", a:false},
-{q:" 私たちの魂はすべて、ビッグバンの時に神によって創造された", a:false},
-{q:" 愛の星地球となるためには、ビジョンを共有することが大切である", a:true },
-{q:" 愛の実践は、見返りを期待して行うべきではない", a:true },
-{q:" 魂グループでの転生輪廻は小学校レベルの魂修行に適したシステムである ", a:true },
-{q:" 私たちの魂は、創造されたときは男性体と女性体が一体だった ", a:true },
-{q:" 私利私欲で自らの道を選択することが、うずきに従うということである", a:false},
-{q:" 神の愛のエネルギーの流れを「スフィア」と呼ぶ ", a:true },
-{q:" 神の手足として働くために最も大切なのは謙虚さである", a:true },
-{q:" 第三の計画で仕事をすることで、その人の想念帯を黄金色に輝かせることが可能である ", a:true },
-{q:" 地球は究極の二元論を学ぶ惑星と呼ばれている ", a:true },
-{q:" 霊界での魂修行に役立つためにも、科学は存在する ", a:false}
-];
+{q:"愛は人びとの間を循環しながら大きなうねりとなる", a:true},
+{q:"愛は実践を通して表現すべきものである", a:true},
+{q:"相手を裁くことは、その人の成長を阻害することにつながる", a:true},
+{q:"愛の実践することは愛の通路となることである", a:true},
+{q:"愛の実践のためには反省は必要ではない  ", a:false},
+{q:"アガシャーは十三次元意識で、アンドロメダ銀河も担当している", a:true},
+{q:"アセンション後、三次元地球文明は石器時代からやり直しとなる", a:true},
+{q:"アセンション後も素粒子そのものは変化しない", a:true},
+{q:"アセンション後は結婚という形態がなくなる ", a:false},
+{q:"アセンション後にどんな仕事をするかは上からの命令で決まる", a:false},
+{q:"甘えにつながるので自分自身を赦してはいけない ", a:false},
+{q:"あまりやりすぎず、適当なところで妥協するのが中道の極意である ", a:false},
+{q:"新たなカルマをつくらないためにも反省は重要である", a:true},
+{q:"アラハンの修行を終えた人は霊道を開くことができる ", a:false},
+{q:"アラハンを超えると誰でも霊道を開くことができる ", a:false},
+{q:"宇宙に偏在する愛のエネルギーとは「ダークエネルギー」のことである", a:true},
+{q:"生まれ落ちる境遇は、生まれる前の自分には決定権はない ", a:false},
+{q:"多くの人びとから愛を与えられれば幸せな一生となる ", a:false},
+{q:"多くの人びとから愛を与えられれば幸せになれる ", a:false},
+{q:"オーム宇宙の最後は超新星爆発に似た姿をとる", a:true},
+{q:"オーム宇宙の人格霊は、ヒューマノイド型の肉体に宿ることが多い", a:true},
+{q:"オーム宇宙の最期は超新星爆発に似た姿をとる", a:true},
+{q:"オーム神霊がルシをつくったため、人びとが悪に手を染めるようになった ", a:false},
+{q:"オームとは「破壊し、創造するもの」という意味である", a:true},
+{q:"オーム宇宙が膨張を続ける速さは次第に減少している ", a:false},
+{q:"オーム宇宙は巨大な球体で膨張を続けている ", a:false},
+{q:"オーム神霊がビッグバンで宇宙を作ったのは今回が初めてである ", a:false},
+{q:"幼くして亡くなった子どもの魂は純粋なので、必ず天上界に還っている  ", a:false},
+{q:"親は子どもに「親に感謝しなさい」と教えなければならない  ", a:false},
+{q:"親は我が子を自分の所有物とみなしてもよい ", a:false},
+{q:"親への感謝の気持ちは親に対する愛の実践で返すことが望ましい", a:true},
+{q:"オリオン出身の両性具有体は、将来、母性で男性体と女性体に引き裂かれる予定である", a:true},
+{q:"科学の発展が魔に利用されることもある", a:true},
+{q:"科学も芸術も、霊界からのインスピレーションで地上に降ろされる", a:true},
+{q:"過去世で蓄えられた智慧を「パーニャパラミッタ」と呼ぶ", a:true},
+{q:"過去の自らの愛の実践は忘れても構わない", a:true},
+{q:"過去世で殺した相手から、今後は殺されなければカルマは返せない", a:false},
+{q:"火星に住んでいた人類の魂が地球で転生することはない", a:false},
+{q:"神に対する感謝の思いがあるならば、愛の実践でお返しすべきである", a:true},
+{q:"神に近づけば近づくほど個性の色がなくなり、無色に近くなる ", a:false},
+{q:"神に近づけば近づくほど個性の色はなくなり透明になる ", a:false},
+{q:"神へと続く道をどんどん進むと個性の色は無色になってくる ", a:false},
+{q:"カルマの刈り取りはこの世の人生の目的のすべてである ", a:false},
+{q:"カルマの刈り取りのためには反省はいらない", a:false},
+{q:"カルマの刈り取りは自力で行うもので、守護霊は助けてはならない ", a:false},
+{q:"カルマの刈り取りができないような人生設計を立てて生まれてくることもある ", a:false},
+{q:"カルマの刈り取りができないような人生設計を立てて生まれることもある ", a:false},
+{q:"救済運動の中心にいる人は魔にねらわれることはない ", a:false},
+{q:"銀色光線の魂は、マテリアル世界がないと力を発揮することができない", a:true},
+{q:"九次元霊でなければ救世主の仕事をすることはできない ", a:false},
+{q:"九次元霊の地上での使命は取り上げられることはない ", a:false},
+{q:"九次元霊は地上でカルマの刈り取りをする必要はない", a:false},
+{q:"原因結果の法則は、今世だけで成り立つ法則である", a:false},
+{q:"弦楽器の弦の張り方の強さのたとえ話で、「中道」が理解しやすくなる", a:true},
+{q:"現在、地球にいる九次元霊は全部で１２人である", a:true},
+{q:"己心の魔は、本人のカルマに関係することが多い", a:true},
+{q:"この世で得た財産はあの世に持って帰れないが、名誉は持って帰れる", a:false},
+{q:"これだけは絶対手放せないというものが、誰にでも必ずある", a:false},
+{q:"今回のビッグバン以前の宇宙から個性として存在していた人格例もいる", a:true},
+{q:"今回のビッグバンの前のオーム宇宙でも、ルシという魂は存在していた", a:true},
+{q:"今世で新たなカルマをつくらないためにも反省はすべきである", a:true},
+{q:"今世の初期条件はカルマと関係が深い", a:true},
+{q:"ゴンドワナ文明で、根本法として「女性の法」が解かれたことがある", a:false},
+{q:"最初から男性体のみとしてつくられた魂も存在する ", a:false},
+{q:"自殺者の霊は地縛霊となることが多い", a:true},
+{q:"指導霊が途中で入れ替わることはない", a:false},
+{q:"地縛霊は多かれ少なかれ地上への執着を持っている", a:true},
+{q:"社会改革のためには陽のエネルギーが必要である", a:true},
+{q:"十次元霊がペアで入っていない惑星もある", a:false},
+{q:"女性の献身的な支えがあってこそ、男性は自分の才能を開花できる", a:true},
+{q:"人格霊で聖アントニウスと交信できるのは九次元上段階の５人のみ ", a:false},
+{q:"人格霊であっても、ヒューマノイド型の肉体に宿るのは少数である", a:false},
+{q:"人生で、時限爆弾が爆発するように病気になることはない ", a:false},
+{q:"神理は学ぶことが重要で、実践はそれほど重要ではない", a:false},
+{q:"神理を学べば愛の実践はしなくてもよい ", a:false},
+{q:"すべての惑星の衛星に陰のエネルギーが宿っている", a:false},
+{q:"すべての人に、カルマの刈り取り以外の使命が与えられている ", a:false},
+{q:"生命エネルギーの注入がうまくできず、早期に病気で他界することもある", a:true},
+{q:"セレニティは人格霊だったことはない", a:false},
+{q:"戦闘系は愛を表現するのが苦手である", a:false},
+{q:"前文明で奴隷を虐待していた者は、今文明で奴隷に生まれることもある", a:true},
+{q:"想念帯の曇りは守護霊からのインスピレーションを阻害する", a:true},
+{q:"想念帯の曇りを取り除くために、反省は有効である", a:true},
+{q:"想念帯は表面意識と潜在意識の間に存在する", a:true},
+{q:"第三の計画で、最も遅くメッセージを降ろした九次元霊はゾロアスターである", a:false},
+{q:"胎児期に蓄積されるエネルギーが「生体エネルギー」である", a:true},
+{q:"大天使ミカエルはドイツ人として生まれたあと、日本人として生まれた", a:true},
+{q:"他人のカルマを背負って生まれてくることはない", a:true},
+{q:"他人のカルマを背負って生まれてくる場合もある ", a:false},
+{q:"他人を裁いてはいけないが、自分を裁くことは反省といえる ", a:false},
+{q:"魂の兄弟グループの組み換えが起こることがある", a:true},
+{q:"魂のパートナーと同時期に地上に生まれることはできない", a:false},
+{q:"魂の本来のパートナーは、原則九次元霊になるとわかる", a:true},
+{q:"魂の兄弟の組み換えが起こることはない ", a:false},
+{q:"誰でも愛の通路となれるわけではない", a:false},
+{q:"誰でも努力を続ければ、いつかは九次元霊になれる可能性がある", a:true},
+{q:"誰でも地上で結婚しなければならないわけではない", a:true},
+{q:"誰もいない惑星にひとりで肉体を持っても愛の実践はできる", a:false},
+{q:"男女が神の前で互いに愛を誓って結婚した以上、離婚することは悪である", a:false},
+{q:"地位、名誉、財産は、それ自体が悪であるといえる", a:false},
+{q:"地球が愛の星になるにはビジョンの共有が重要である", a:true},
+{q:"地球シフトアップに向けてビジョンの共有が重要である", a:true},
+{q:"地球シフトアップに向けて、ビジョンの共有が重要である", a:true},
+{q:"地球は宇宙のDNAの宝庫と呼ばれている", a:true},
+{q:"地球には大日意識をはじめとする十次元霊が１３体いる", a:false},
+{q:"地球には大日意識をはじめとする十次元霊が３体いる", a:false},
+{q:"地球のアセンションが失敗しても、オーム宇宙の進化とは関係ない", a:false},
+{q:"地上に降りた九次元霊がサタンに負けることなどあり得ない", a:false},
+{q:"地上の人間に、光の天使としての使命が明かされることがある", a:true},
+{q:"地上の人間が反省している時には、守護霊は休んでいてよい", a:false},
+{q:"地上の人間が反省している時には、守護霊は休んでよい", a:false},
+{q:"中道とは頑張りすぎないことである ", a:false},
+{q:"つかんでいるものがあると、そこに己心の魔が爪をかけることが多い", a:true},
+{q:"天台大師に「一念三千」のインスピレーションを降ろしたのは仏陀である", a:true},
+{q:"どの病気にかかるかは、生まれる前にすでに決まっている", a:false},
+{q:"肉体的欠陥を持って生まれるのは、過去世のカルマを刈り取るためである", a:false},
+{q:"波長同通の法則とは無関係に行われるのが無差別憑依である ", a:false},
+{q:"八正道の「正しさの基準」は神の愛の方向かどうかである", a:true},
+{q:"八正道以外の反省は、やってもあまり効果がない ", a:false},
+{q:"八正道の正しさの基準は、神の愛の方向かどうかということである", a:true},
+{q:"反省で想念帯の曇りを晴らすことはできない", a:false},
+{q:"反省で間違いに気づいたら、神に詫びれば相手に謝らなくてもいい ", a:false},
+{q:"反省とは八正道に沿って行われなければならない ", a:false},
+{q:"反省により想念帯に修正を加え、過去を変えることは可能である ", a:false},
+{q:"反省は、新たなカルマの原因をつくらないことにつながる", a:true},
+{q:"反省は毎日行うことが望ましい", a:true},
+{q:"光の柱はアセンションのためであり、地獄霊の救済とは関係ない ", a:false},
+{q:"光の天使の使命が地上で変更になることはない", a:false},
+{q:"ビジョンの共有は創造力と関係ない ", a:false},
+{q:"ビッグバンで創造された魂が、どの天体に宿るかはすべてオームが決めた", a:false},
+{q:"ビッグバンのあと、銀河意識、恒星意識、惑星意識の順につくられた", a:false},
+{q:"ひとり山にこもって愛の実践をするのは難しい", a:true},
+{q:"病気の時に反省しても、病気の原因がわかるわけではない", a:false},
+{q:"ふつう過去世の記憶は潜在意識の中に存在する", a:true},
+{q:"分霊は独立しているので本体の魂の記憶を共有することはない", a:false},
+{q:"母性というのは、母親になった時に初めて発揮されるものである", a:false},
+{q:"本来の魂のパートナーと結婚しなければ、愛を学ぶことはできない", a:false},
+{q:"本来の魂のパートナーと結婚することが、地上の結婚生活の目的である ", a:false},
+{q:"まずは霊道を開くことが光の天使の果たす第一歩である ", a:false},
+{q:"マテリアル世界での波動が精妙になることをアセンションと呼ぶ", a:true},
+{q:"マルデックには当初、ルシのエネルギー体が宿っていた", a:false},
+{q:"自らの愛の実践の記憶は一生忘れてはならない", a:false},
+{q:"未来を心配しすぎても執着になる", a:true},
+{q:"未来を心配しすぎても執着にはならない", a:false},
+{q:"ムー文明の末期にもアセンションした人はいた ", a:false},
+{q:"無差別憑依とは、波長導通の法則とは関係ない憑依である", a:false},
+{q:"唯一無二の個性を通して愛を実践するとき、最も神性がきらめく", a:true},
+{q:"唯一無二の個性を通して愛を実践する時、神性が最もきらめく", a:true},
+{q:"世の中のためになるなら家庭で愛の実践をしなくてもよい", a:false},
+{q:"ルシが地獄に落ちた時、ルシに縁がある光の天使たちも落ちて行った", a:true},
+{q:"ルシが地獄に落ちた時、魂のパートナーは天上界にいた ", a:false},
+{q:"霊道が開けばどんな霊能力も使えるようになる", a:false},
+{q:"霊道を開くための修行は重要である ", a:false},
+{q:"霊道を開くと反省の必要がなくなる ", a:false},
+{q:"霊道を開かなくても、少しはパーニャパラミッタが出てくることがある", a:true},
+{q:"六次元から上の霊界を「天上界」と呼ぶ", a:true},
+{q:"私たちが最もなすべきことは愛の実践である", a:true},
+{q:"私たちの魂はすべて、ビッグバンと同時に創造された ", a:false},
+{q:"私たちの魂はすべて、ビッグバンの時に神によって創造された ", a:false},
+{q:"愛の星地球となるためには、ビジョンを共有することが大切である", a:true},
+{q:"愛の実践は、見返りを期待して行うべきではない", a:true},
+{q:"魂グループでの転生輪廻は小学校レベルの魂修行に適したシステムである", a:true},
+{q:"私たちの魂は、創造されたときは男性体と女性体が一体だった", a:true},
+{q:"私利私欲で自らの道を選択することが、うずきに従うということである", a:false},
+{q:"神の愛のエネルギーの流れを「スフィア」と呼ぶ", a:true},
+{q:"神の手足として働くために最も大切なのは謙虚さである", a:true},
+{q:"第三の計画で仕事をすることで、その人の想念帯を黄金色に輝かせることが可能である", a:true},
+{q:"地球は究極の二元論を学ぶ惑星と呼ばれている", a:true},
+{q:"霊界での魂修行に役立つためにも、科学は存在する", a:false},
 
-let currentQ = [], idx = 0, score = 0, timer, timeLeft = 60;
+    ];
 
-function goTo(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
+    // ===== DOM参照 =====
+    const landingScreen  = document.getElementById('landing-screen');
+    const menuScreen     = document.getElementById('menu-screen');
+    const quizScreen     = document.getElementById('quiz-screen');
+    const resultScreen   = document.getElementById('result-screen');
 
-function startQ(num) {
-    currentQ = [...data].sort(() => Math.random() - 0.5).slice(0, num);
-    idx = 0; score = 0;
-    
-    // リザルト画面の状態やエフェクトをリセット
-    const resPage = document.getElementById('p-res');
-    resPage.classList.remove('pass', 'fail');
-    document.getElementById('confetti').classList.remove('show');
-    document.getElementById('confetti').innerHTML = '';
-    document.getElementById('firework').classList.remove('show');
-    document.getElementById('firework').innerHTML = '';
-    
-    goTo('p-quiz');
-    render();
-}
+    const enterBtn       = document.getElementById('enter-btn');
+    const nicknameInput  = document.getElementById('nickname');
+    const nicknameError  = document.getElementById('nickname-error');
+    const menuButtons    = document.querySelectorAll('.menu-btn');
 
-function render() {
-    clearInterval(timer);
-    document.getElementById('q-text').innerText = (idx + 1) + ". " + currentQ[idx].q;
-    timeLeft = 60;
-    const bar = document.getElementById('timer-bar');
-    timer = setInterval(() => {
-        timeLeft -= 0.1;
-        bar.style.width = (timeLeft / 60 * 100) + "%";
-        if(timeLeft <= 0) handleAns(null);
-    }, 100);
-}
+    const timerWrap      = document.getElementById('timer-wrap');
+    const timerBar       = document.getElementById('timer-bar');
+    const questionText   = document.getElementById('question-text');
+    const maruBtn        = document.getElementById('maru-btn');
+    const batsuBtn       = document.getElementById('batsu-btn');
 
-function handleAns(val) {
-    if(val === currentQ[idx].a) score++;
-    idx++;
-    if(idx < currentQ.length) {
-        render();
-    } else {
-        finish();
+    const resultMessage  = document.getElementById('result-message');
+    const resultBadge    = document.getElementById('result-badge');
+    const retryLink      = document.getElementById('retry-link');
+    const homeLink       = document.getElementById('home-link');
+    const confetti       = document.getElementById('confetti');
+    const firework       = document.getElementById('firework');
+    const doorTransition = document.getElementById('door-transition');
+
+    const PASS_RATE            = 0.8;
+    const NORMAL_LIMIT_SECONDS = 60;
+
+    let currentQuestions = [];
+    let wrongQuestions   = [];
+    let currentIndex     = 0;
+    let correctCount     = 0;
+    let timerId          = null;
+    let timeLeft         = NORMAL_LIMIT_SECONDS;
+    let currentMode      = 'normal';
+    let playerName       = '';
+    let answered         = false;
+
+    // ===== ○×バランス抽出 =====
+    function selectQuestions(num) {
+      if (num >= allQuestions.length) return shuffle(allQuestions);
+      const trueItems  = shuffle(allQuestions.filter(q => q.a === true));
+      const falseItems = shuffle(allQuestions.filter(q => q.a === false));
+      const targetFalse = Math.floor(num / 2);
+      const countFalse  = Math.min(targetFalse, falseItems.length);
+      const countTrue   = num - countFalse;
+      return shuffle([...trueItems.slice(0, countTrue), ...falseItems.slice(0, countFalse)]);
     }
-}
 
-// コンフェッティ（花びら＋四角＋星）生成関数
-function makeConfetti() {
-    const confetti = document.getElementById('confetti');
-    confetti.innerHTML = '';
-    const colors = ['#ff1744','#ff9100','#ffee58','#00c853','#00b0ff','#304ffe','#d500f9','#ff80ab','#ffe57f'];
-    const shapes = ['', 'petal', 'petal', 'star'];
-    const count = 100;
-    for (let i = 0; i < count; i++) {
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showScreen(screen) {
+      [landingScreen, menuScreen, quizScreen, resultScreen].forEach(s => s.classList.remove('active'));
+      screen.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function openDoorThen(callback) {
+      doorTransition.innerHTML = '<div class="door-panel door-left"></div><div class="door-panel door-right"></div>';
+      doorTransition.classList.add('active');
+      setTimeout(() => {
+        doorTransition.classList.remove('active');
+        callback();
+      }, 850);
+    }
+
+    function validateNickname() {
+      const name = nicknameInput.value.trim();
+      if (!name) {
+        nicknameError.textContent = 'ニックネームを入力してください。';
+        nicknameInput.focus();
+        return false;
+      }
+      nicknameError.textContent = '';
+      playerName = name;
+      return true;
+    }
+
+    function fitQuestionText() {
+      questionText.style.fontSize = '';
+      questionText.style.lineHeight = '';
+      const isSmallMobile    = window.innerWidth <= 480;
+      const isMobile         = window.innerWidth <= 768;
+      const isLandscapeSmall = window.innerHeight <= 500;
+      if (isLandscapeSmall) {
+        questionText.style.fontSize   = 'clamp(18px, 3.2vw, 30px)';
+        questionText.style.lineHeight = '1.65';
+      } else if (isSmallMobile) {
+        questionText.style.fontSize   = 'clamp(20px, 5.8vw, 28px)';
+        questionText.style.lineHeight = '1.65';
+      } else if (isMobile) {
+        questionText.style.fontSize   = 'clamp(22px, 5.4vw, 34px)';
+        questionText.style.lineHeight = '1.65';
+      } else {
+        questionText.style.fontSize   = 'clamp(28px, 4vw, 48px)';
+        questionText.style.lineHeight = '1.65';
+      }
+    }
+
+    function setButtonsDisabled(flag) {
+      maruBtn.disabled  = flag;
+      batsuBtn.disabled = flag;
+    }
+
+    function clearTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    function updateTimerBar() {
+      const percent = Math.max(0, (timeLeft / NORMAL_LIMIT_SECONDS) * 100);
+      timerBar.style.width = percent + '%';
+    }
+
+    function startTimer() {
+      clearTimer();
+      timeLeft = NORMAL_LIMIT_SECONDS;
+      updateTimerBar();
+      timerId = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          updateTimerBar();
+          clearTimer();
+          handleAnswer('TIMEOUT');
+          return;
+        }
+        updateTimerBar();
+      }, 100);
+    }
+
+    // ===== 豪華コンフェッティ（紙吹雪生成） =====
+    function makeConfetti() {
+      confetti.innerHTML = '';
+      const colors = ['#ff1744','#ff9100','#ffee58','#00c853','#00b0ff','#304ffe','#d500f9','#ff80ab','#ffe57f'];
+      const shapes = ['', 'petal', 'petal', 'star'];
+      const count  = window.innerWidth < 480 ? 90 : 150;
+      for (let i = 0; i < count; i++) {
         const piece = document.createElement('div');
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         piece.className = 'confetti-piece ' + shape;
         const size = 8 + Math.random() * 14;
-        piece.style.left = Math.random() * 100 + '%';
-        piece.style.width = size + 'px';
-        piece.style.height = shape === 'star' ? size + 'px' : (size * 1.8) + 'px';
-        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.animationDuration = (3.5 + Math.random() * 4.5) + 's';
-        piece.style.animationDelay = (Math.random() * 3) + 's';
-        piece.style.opacity = String(0.7 + Math.random() * 0.3);
-        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+        piece.style.left              = Math.random() * 100 + '%';
+        piece.style.width             = size + 'px';
+        piece.style.height            = shape === 'star' ? size + 'px' : (size * 1.8) + 'px';
+        piece.style.background        = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2.5 + Math.random() * 3.5) + 's';
+        piece.style.animationDelay    = (Math.random() * 2.5) + 's';
+        piece.style.opacity           = String(0.7 + Math.random() * 0.3);
+        piece.style.transform         = `rotate(${Math.random() * 360}deg)`;
         confetti.appendChild(piece);
+      }
     }
-}
 
-// 花火バースト生成関数
-function makeFireworks() {
-    const firework = document.getElementById('firework');
-    firework.innerHTML = '';
-    firework.classList.add('show');
-    const colors = ['#ff1744','#ff9100','#ffee58','#00c853','#00b0ff','#d500f9'];
-    const bursts = 5;
-    for (let b = 0; b < bursts; b++) {
+    // ===== 花火バースト =====
+    function makeFireworks() {
+      firework.innerHTML = '';
+      firework.classList.add('show');
+      const colors = ['#ff1744','#ff9100','#ffee58','#00c853','#00b0ff','#d500f9'];
+      const bursts = 5;
+      for (let b = 0; b < bursts; b++) {
         const bx = 10 + Math.random() * 80;
         const by = 5 + Math.random() * 50;
         setTimeout(() => {
-            const NUM_SPARKS = 16;
-            for (let s = 0; s < NUM_SPARKS; s++) {
-                const spark = document.createElement('div');
-                spark.className = 'spark';
-                const angle = (s / NUM_SPARKS) * Math.PI * 2;
-                const dist = 60 + Math.random() * 80;
-                spark.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
-                spark.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-                spark.style.left = bx + '%';
-                spark.style.top = by + '%';
-                spark.style.background = colors[Math.floor(Math.random() * colors.length)];
-                spark.style.width = (4 + Math.random() * 4) + 'px';
-                spark.style.height = spark.style.width;
-                firework.appendChild(spark);
-            }
+          const NUM_SPARKS = 16;
+          for (let s = 0; s < NUM_SPARKS; s++) {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            const angle = (s / NUM_SPARKS) * Math.PI * 2;
+            const dist  = 60 + Math.random() * 80;
+            spark.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+            spark.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+            spark.style.left       = bx + '%';
+            spark.style.top        = by + '%';
+            spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+            spark.style.width      = (4 + Math.random() * 4) + 'px';
+            spark.style.height     = spark.style.width;
+            firework.appendChild(spark);
+          }
         }, b * 350);
+      }
     }
-}
 
-function finish() {
-    clearInterval(timer);
-    goTo('p-res');
-    
-    const total = currentQuestions.length;
-    const pass = (score / total) >= 0.8;
-    const resPage = document.getElementById('p-res');
-    
-    resPage.classList.remove('pass', 'fail');
-    resPage.classList.add(pass ? 'pass' : 'fail');
-    
-    document.getElementById('res-msg').innerText = `結果: ${score} / ${total}`;
-    
-    const judgeBox = document.getElementById('judge-box');
-    judgeBox.innerText = pass ? "合格" : "不合格";
-    
-    const confettiEl = document.getElementById('confetti');
-    const fireworkEl = document.getElementById('firework');
-    
-    if (pass) {
-        makeConfetti();
-        confettiEl.classList.add('show');
-        makeFireworks();
-    } else {
-        confettiEl.classList.remove('show');
-        confettiEl.innerHTML = '';
-        fireworkEl.classList.remove('show');
-        fireworkEl.innerHTML = '';
+    function renderQuestion() {
+      const current = currentQuestions[currentIndex];
+      questionText.textContent = current.q;
+      fitQuestionText();
+      answered = false;
+      setButtonsDisabled(false);
+      if (currentMode === 'normal') {
+        timerWrap.style.display = 'block';
+        startTimer();
+      } else {
+        timerWrap.style.display = 'none';
+        clearTimer();
+      }
     }
-}
-</script>
+
+    function goNextQuestion() {
+      currentIndex += 1;
+      if (currentIndex >= currentQuestions.length) {
+        if (currentMode === 'normal') {
+          showResult();
+        } else {
+          alert('解き直しが終了しました。ホーム画面に戻ります。');
+          backToHome();
+        }
+        return;
+      }
+      quizScreen.classList.remove('flash-correct', 'flash-wrong');
+      renderQuestion();
+    }
+
+    // ○ボタン → true、×ボタン → false として判定
+    function handleAnswer(choice) {
+      if (answered) return;
+      answered = true;
+      setButtonsDisabled(true);
+      clearTimer();
+
+      const current   = currentQuestions[currentIndex];
+      const correct   = current.a; // true or false
+      let isCorrect;
+      if (choice === 'TIMEOUT') {
+        isCorrect = false;
+      } else {
+        isCorrect = choice === correct; // choice は true/false
+      }
+
+      if (currentMode === 'normal') {
+        if (isCorrect) {
+          correctCount += 1;
+        } else {
+          wrongQuestions.push(current);
+        }
+        setTimeout(goNextQuestion, 180);
+      } else {
+        if (isCorrect) {
+          quizScreen.classList.add('flash-correct');
+          quizScreen.classList.remove('flash-wrong');
+        } else {
+          quizScreen.classList.add('flash-wrong');
+          quizScreen.classList.remove('flash-correct');
+        }
+        setTimeout(goNextQuestion, 700);
+      }
+    }
+
+    function startQuiz(count) {
+      currentMode      = 'normal';
+      correctCount     = 0;
+      wrongQuestions   = [];
+      currentIndex     = 0;
+      currentQuestions = selectQuestions(count);
+      quizScreen.classList.remove('flash-correct', 'flash-wrong');
+      showScreen(quizScreen);
+      renderQuestion();
+    }
+
+    // ===== 全回答終了時のリザルト画面表示 =====
+    function showResult() {
+      clearTimer();
+      showScreen(resultScreen);
+      const total = currentQuestions.length;
+
+      resultMessage.textContent = `大変お疲れ様でした。${playerName}さんの正解数は ${correctCount}／${total} です。`;
+      resultBadge.textContent   = `${correctCount}問正解！！`;
+
+      const challengeEl = document.getElementById('result-challenge');
+      challengeEl.textContent = wrongQuestions.length > 0 ? 'また挑戦してね！次こそ全問正解☆' : '🎉 全問正解おめでとう！！ 🎉';
+
+      // 全回答終了後：金ピカ背景の上に紙吹雪と花火を盛大に舞わせる
+      makeConfetti();
+      confetti.classList.add('show');
+      makeFireworks();
+
+      retryLink.style.display = wrongQuestions.length > 0 ? 'inline' : 'none';
+    }
+
+    function startRetryWrongQuestions() {
+      if (!wrongQuestions.length) { backToHome(); return; }
+      currentMode      = 'retry';
+      currentIndex     = 0;
+      currentQuestions = [...wrongQuestions];
+      quizScreen.classList.remove('flash-correct', 'flash-wrong');
+      showScreen(quizScreen);
+      renderQuestion();
+    }
+
+    function backToHome() {
+      clearTimer();
+      currentMode      = 'normal';
+      currentIndex     = 0;
+      currentQuestions = [];
+      wrongQuestions   = [];
+      correctCount     = 0;
+      quizScreen.classList.remove('flash-correct', 'flash-wrong');
+      confetti.classList.remove('show');
+      confetti.innerHTML = '';
+      firework.classList.remove('show');
+      firework.innerHTML = '';
+      showScreen(landingScreen);
+    }
+
+    // ===== イベント =====
+    enterBtn.addEventListener('click', () => {
+      openDoorThen(() => showScreen(menuScreen));
+    });
+
+    nicknameInput.addEventListener('input', () => {
+      if (nicknameInput.value.trim()) nicknameError.textContent = '';
+    });
+
+    menuButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!validateNickname()) return;
+        const count = Number(btn.dataset.count);
+        startQuiz(count);
+      });
+    });
+
+    // ○ボタン → true、×ボタン → false
+    maruBtn.addEventListener('click',  () => handleAnswer(true));
+    batsuBtn.addEventListener('click', () => handleAnswer(false));
+
+    retryLink.addEventListener('click', () => { startRetryWrongQuestions(); });
+    homeLink.addEventListener('click',  () => { backToHome(); });
+
+    window.addEventListener('resize',            fitQuestionText);
+    window.addEventListener('orientationchange', fitQuestionText);
+    document.addEventListener('DOMContentLoaded', () => { fitQuestionText(); });
+  </script>
 </body>
 </html>
